@@ -35,8 +35,12 @@ def plot_global_spatial(
     uns_key : str
         The key in adata.uns where the full dataframe is stored.
     """
+
+    # Check for save argument
+    # We remove it from kwargs so Scanpy doesn't trigger an early save.
+    save_filename = kwargs.pop('save', None)
     
-    # --- STEP 1: Data Integrity Check & Alignment ---
+    #  Data Integrity Check & Alignment ---
     
     # Check if the global master file exists
     if uns_key not in adata.uns:
@@ -129,5 +133,17 @@ def plot_global_spatial(
                 zorder=1, # zorder=1 forces this BEHIND the subset
                 rasterized=True # Optimization for large backgrounds
             )
-
-    return axes_list
+    # We save here, ensuring the background is captured.
+        if save_filename:
+            # If the user provided a simple name like "plot.png", we can just save it.
+            # We explicitly set facecolor to capture the dark mode background.
+            plt.savefig(
+                save_filename, 
+                facecolor=figure_color, 
+                edgecolor='none',
+                bbox_inches='tight',
+                dpi=300
+            )
+            print(f"Figure saved to: {save_filename}")
+            
+return axes_list
