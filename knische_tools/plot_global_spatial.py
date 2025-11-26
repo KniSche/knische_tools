@@ -9,7 +9,8 @@ def plot_global_spatial(
     basis="global_spatial", 
     uns_key="global_spatial",
     background_color='lightgrey',
-    background_size=0.1
+    background_size=0.1,
+    size=None,
     figsize=None,
     **kwargs
 ):
