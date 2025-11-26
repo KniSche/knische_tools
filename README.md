@@ -1,27 +1,27 @@
 # KniSche tools
 
-A selection of custom functions for bioinformatics analysis centred on single cell and spatial next generation sequencing.
+> A selection of custom functions for bioinformatics analysis centred on single cell and spatial next generation sequencing.
 
 ## Installation
 
-You can install this package directly from GitHub using pip:
+You can install this list of tools as a package directly from GitHub using pip:
 
 ```bash
 pip install git+[https://github.com/knische/knische_tools.git](https://github.com/knische/knische_tools.git)
 ```
 
 ## List of Functions
-1. [plot_global_spatial]`plot_global_spatial`
-	
-	This tool is plot wrapper function around [sc.pl.embedding], allowing users to plot subset embeddings
-	from adata.obsm["embedding"] onto the embedding made from the entire set.
+1. `plot_global_spatial`
+	This tool is plot wrapper function around `sc.pl.embedding`, allowing users to plot subset embeddings
+	from `adata.obsm["embedding"]` onto the embedding made from the entire set.
 	Primary use is solving the problem of visualizing a small subset of cells 
 	(e.g., a specific tissue section or cell type) while maintaining the context of the full dataset's embedding
 	without requiring the user to manually manage massive coordinate files.
-
-	### Prerequisites
+<details>
+<summary></summary>
+### Prerequisites
 	This tool assumes you are using Scanpy and have a global reference embedding in adata.uns
-	(e.g., a CSV of X/Y coordinates for the whole atlas). The function looks for [adata.uns['global_spatial']] by default.
+	(e.g., a CSV of X/Y coordinates for the whole atlas). The function looks for `adata.uns['global_spatial']` by default.
 	
 	This can be set up as follows:
 	```python
@@ -72,3 +72,7 @@ pip install git+[https://github.com/knische/knische_tools.git](https://github.co
 	## Other notes
 	- The background layer is automatically rasterized to keep file sizes small when exporting to PDF/SVG.
 		
+</details>
+2. 
+
+
