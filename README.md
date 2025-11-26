@@ -43,7 +43,7 @@ pip install git+https://github.com/knische/knische_tools
 	### Usage
 	```python
 	import matplotlib.pyplot as plt
-	from knische_spatial import plot_global_spatial
+	from knische_tools import plot_global_spatial
 
 	# Simple plot
 	plot_global_spatial(
@@ -60,17 +60,16 @@ pip install git+https://github.com/knische/knische_tools
 	**Parameters:**
 
 	* **`adata`** *(AnnData)*: The subset object. Must contain global coords in `adata.uns[uns_key]`.
-	* **`color`** *(str or list)*: Keys for annotations of observations/cells or variables/genes (e.g., `'cell_type'` or `['geneA', 'geneB']`).
+	* **`color`** *(str or list)*: Keys for annotations of observations/cells or variables/genes (e.g., `'leiden'` or `['geneA', 'geneB']`).
 	* **`basis`** *(str, default='global_spatial')*: The key to store/access the aligned coordinates in `adata.obsm`.
 	* **`uns_key`** *(str, default='global_spatial')*: The key in `adata.uns` where the full reference DataFrame is stored.
 	* **`background_color`** *(str, default='lightgrey')*: Color of the global reference points.
-	* **`background_size`** *(int, default=5)*: Size of the global reference points.
+	* **`background_size`** *(int, default=`None`)*: Size of the global reference points.
 	* **`subset_size`** *(int, optional)*: Size of the subset points. If `None`, defaults to Scanpy's automatic sizing.
-	* **`remove_overlapping_background`** *(bool, default=True)*: If `True`, removes global points that sit directly underneath subset points. Recommended when using transparency/alpha.
 	* **`**kwargs`**: Additional arguments passed to `sc.pl.embedding` (e.g., `cmap`, `vmax`, `frameon`, `alpha`).
 
 	## Other notes
-	- The background layer is automatically rasterized to keep file sizes small when exporting to PDF/SVG.
+	- The background layer is automatically rasterized.
 			
 	</details>
 2. 
