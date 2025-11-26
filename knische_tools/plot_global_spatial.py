@@ -11,7 +11,7 @@ def plot_global_spatial(
     background_color='lightgrey',
     background_size=0.0002,
     size=10,
-    fig_size=(20,20),
+    figure_size=(20,20),
     figure_color='#0D0D0D',           # Color of the background / canvas
     text_color='auto',                # 'auto' switches based on figure_color
     **kwargs
@@ -74,7 +74,7 @@ def plot_global_spatial(
 
     # Plot the Subset (Foreground) using Scanpy
     # zorder=2 forces these points to sit ON TOP of the background
-    # We only apply fig_size if the user requested it AND they didn't pass an existing axis
+    # We only apply figure_size if the user requested it AND they didn't pass an existing axis
     # If text_color is 'auto', choose white for dark backgrounds, black for light.
     if text_color == 'auto':
         # Simple heuristic: if figure_color is dark (starts with #0 or #1 or Black)
@@ -97,9 +97,9 @@ def plot_global_spatial(
         # 'grid.color': calc_text_color # Optional: if you use grids
     }
 
-    # Add custom fig_size if provided
-    if fig_size is not None and 'ax' not in kwargs:
-        rc_params['figure.figsize'] = fig_size
+    # Add custom figure_size if provided
+    if figure_size is not None and 'ax' not in kwargs:
+        rc_params['figure.figsize'] = figure_size
 
     # Apply the context just for this plotting command
     with plt.rc_context(rc_params):
