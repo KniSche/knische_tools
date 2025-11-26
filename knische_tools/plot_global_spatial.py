@@ -99,7 +99,7 @@ def plot_global_spatial(
 
     # Add custom fig_size if provided
     if fig_size is not None and 'ax' not in kwargs:
-        rc_params['figure.fig_size'] = fig_size
+        rc_params['figure.figsize'] = fig_size
 
     # Apply the context just for this plotting command
     with plt.rc_context(rc_params):
