@@ -19,6 +19,7 @@ pip install git+https://github.com/knische/knische_tools
 	without requiring the user to manually manage massive coordinate files.
 	<details>
 	<summary>Usage and Documentation</summary>
+	
 	### Prerequisites
 	This tool assumes you are using Scanpy and have a global reference embedding in adata.uns
 	(e.g., a CSV of X/Y coordinates for the whole atlas). The function looks for `adata.uns['global_spatial']` by default.
