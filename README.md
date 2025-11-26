@@ -48,8 +48,7 @@ pip install git+https://github.com/knische/knische_tools
 	# Simple plot
 	plot_global_spatial(
 		adata, 
-		color=['cell_type', 'gene_of_interest'],
- 		figsize=(10, 10)
+		color=['leiden', 'donor']
 	)
 
 	plt.show()
@@ -59,17 +58,34 @@ pip install git+https://github.com/knische/knische_tools
 	Plots a subset of data on top of the full atlas coordinates.
 
 	**Parameters:**
-
+	
 	* **`adata`** *(AnnData)*: The subset object. Must contain global coords in `adata.uns[uns_key]`.
-	* **`color`** *(str or list)*: Keys for annotations of observations/cells or variables/genes (e.g., `'leiden'` or `['geneA', 'geneB']`).
+	* **`color`** *(str or list)*: Keys for annotations of observations/cells or variables/genes (e.g., `'cell_type'` or `['geneA', 'geneB']`).
 	* **`basis`** *(str, default='global_spatial')*: The key to store/access the aligned coordinates in `adata.obsm`.
 	* **`uns_key`** *(str, default='global_spatial')*: The key in `adata.uns` where the full reference DataFrame is stored.
-	* **`background_color`** *(str, default='lightgrey')*: Color of the global reference points.
-	* **`background_size`** *(int, default=`None`)*: Size of the global reference points.
-	* **`size`** *(int, optional)*: Size of the subset points. If `None`, defaults to Scanpy's automatic sizing.
-    * **`figsize`** *(tuple, default= (20,10) optional)*: Manually sets the figure size. e.g., (10, 10). If `None`, uses Scanpy's default sizing.
-	* **`**kwargs`**: Additional arguments passed to `sc.pl.embedding` (e.g., `cmap`, `vmax`, `frameon`, `alpha`).
+	* **`size`** *(int, default=10, optional)*: Size of the subset points. If `None`, defaults to Scanpy's automatic sizing.
+    * **`**kwargs`**: Additional arguments passed to `sc.pl.embedding` (e.g., `cmap`, `vmax`, `frameon`, `alpha`).
+	
+	**Background underlay options:**
+	* **`background_size`** *(int, default=0.0002)*: Size of the global reference points.
+    * **`background_color`** *(str, default='lightgrey')*: Color of the **global reference points**. *Tip: If using a dark figure_color, try a darker grey (e.g., '#333333') for a subtle effect.*
+	
+	**Style & Theme:**
+	* **`figure_color`** *(str, default='#0D0D0D')*: The background color of the figure canvas (95% Black). Set to `'white'` for standard paper figures.
+    * **`figure_size`** *(tuple, default=(20,20), optional)*: Manually set the figure size (width, height) in inches, e.g., `(10, 10)`. If `None`, defaults to Scanpy's automatic sizing.
+	* **`text_color`** *(str, default='auto')*: Color of axes labels and text. `'auto'` automatically selects white for dark backgrounds and black for light backgrounds.
 
+	### Style example: Switching to "White Paper" Mode
+	
+	```python
+	plot_global_embedding_optimized(
+	adata, 
+	color=['geneA'], 
+	figure_color='white',       # White background
+	background_color='gainsboro' # Light grey points
+	)
+    ```
+ 
 	## Other notes
 	- The background layer is automatically rasterized.
 			
