@@ -75,6 +75,9 @@ pip install git+https://github.com/knische/knische_tools
     * **`figure_size`** *(tuple, default=(20,20), optional)*: Manually set the figure size (width, height) in inches, e.g., `(10, 10)`. If `None`, defaults to Scanpy's automatic sizing.
 	* **`text_color`** *(str, default='auto')*: Color of axes labels and text. `'auto'` automatically selects white for dark backgrounds and black for light backgrounds.
 
+	**Save image:**
+    * **`save`** *(str, default=None)*: File name to save to, e.g., `'plot.png'`. unlike sc.pl.embedding it will not default to `figures/*`, and the full path needs to be specified.
+ 
 	### Style example: Switching to "White Paper" Mode
 	
 	```python
@@ -90,6 +93,6 @@ pip install git+https://github.com/knische/knische_tools
 	- The background layer is automatically rasterized.
 			
 	</details>
-2. 
+
 
 
