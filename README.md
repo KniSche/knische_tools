@@ -48,7 +48,8 @@ pip install git+https://github.com/knische/knische_tools
 	# Simple plot
 	plot_global_spatial(
 		adata, 
-		color=['cell_type', 'gene_of_interest']
+		color=['cell_type', 'gene_of_interest'],
+ 		figsize=(10, 10)
 	)
 
 	plt.show()
@@ -65,7 +66,8 @@ pip install git+https://github.com/knische/knische_tools
 	* **`uns_key`** *(str, default='global_spatial')*: The key in `adata.uns` where the full reference DataFrame is stored.
 	* **`background_color`** *(str, default='lightgrey')*: Color of the global reference points.
 	* **`background_size`** *(int, default=`None`)*: Size of the global reference points.
-	* **`subset_size`** *(int, optional)*: Size of the subset points. If `None`, defaults to Scanpy's automatic sizing.
+	* **`size`** *(int, optional)*: Size of the subset points. If `None`, defaults to Scanpy's automatic sizing.
+    * **`figsize`** *(tuple, default= (20,10) optional)*: Manually sets the figure size. e.g., (10, 10). If `None`, uses Scanpy's default sizing.
 	* **`**kwargs`**: Additional arguments passed to `sc.pl.embedding` (e.g., `cmap`, `vmax`, `frameon`, `alpha`).
 
 	## Other notes
