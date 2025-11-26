@@ -146,4 +146,4 @@ def plot_global_spatial(
             )
             print(f"Figure saved to: {save_filename}")
             
-return axes_list
+    return axes_list
