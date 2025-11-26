@@ -9,8 +9,9 @@ def plot_global_spatial(
     basis="global_spatial", 
     uns_key="global_spatial",
     background_color='lightgrey',
-    background_size=None,
-    subset_size=None,
+    background_size=0.1,
+    size=None,
+    figsize=None,
     **kwargs
 ):
     """
@@ -71,15 +72,22 @@ def plot_global_spatial(
 
     # Plot the Subset (Foreground) using Scanpy
     # zorder=2 forces these points to sit ON TOP of the background
-    axes_list = sc.pl.embedding(
-        adata, 
-        basis=basis, 
-        color=color, 
-        show=False, 
-        size=subset_size,
-        zorder=2, 
-        **kwargs
-    )
+    # We only apply figsize if the user requested it AND they didn't pass an existing axis
+    rc_params = {}
+    if figsize is not None and 'ax' not in kwargs:
+        rc_params['figure.figsize'] = figsize
+
+    # Apply the context just for this plotting command
+    with plt.rc_context(rc_params):
+        axes_list = sc.pl.embedding(
+            adata, 
+            basis=basis, 
+            color=color, 
+            show=False, 
+            size=size,
+            zorder=2, 
+            **kwargs
+        )
 
     # Handle Single vs Multiple Panels (Standardize to list)
     if not isinstance(axes_list, list):
