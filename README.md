@@ -55,9 +55,7 @@ pip install git+https://github.com/knische/knische_tools
 	plt.show()
 	```
 	
-	### Additional Documentation
-	Plots a subset of data on top of the full atlas coordinates.
-
+	### Argument documentation
 	**Parameters:**
 	
 	* **`adata`** *(AnnData)*: The subset object. Must contain global coords in `adata.uns[uns_key]`.
