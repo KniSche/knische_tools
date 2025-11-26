@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='knische_tools',              # Name of the package
-    version='0.1.22',
+    version='0.1.23',
     packages=find_packages(),          # Automatically finds the 'knische_tools' folder
     install_requires=[                 # Dependencies
         'scanpy',
