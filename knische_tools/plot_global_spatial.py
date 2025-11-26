@@ -12,6 +12,8 @@ def plot_global_spatial(
     background_size=0.1,
     size=None,
     figsize=None,
+    figure_color='#0D0D0D',           # Color of the background / canvas
+    text_color='auto',                # 'auto' switches based on figure_color
     **kwargs
 ):
     """
@@ -73,7 +75,29 @@ def plot_global_spatial(
     # Plot the Subset (Foreground) using Scanpy
     # zorder=2 forces these points to sit ON TOP of the background
     # We only apply figsize if the user requested it AND they didn't pass an existing axis
-    rc_params = {}
+    # If text_color is 'auto', choose white for dark backgrounds, black for light.
+    if text_color == 'auto':
+        # Simple heuristic: if figure_color is dark (starts with #0 or #1 or Black)
+        if figure_color.lower() in ['black', '#000000', '#0d0d0d'] or figure_color.startswith(('#0', '#1', '#2')):
+            calc_text_color = 'white'
+        else:
+            calc_text_color = 'black'
+    else:
+        calc_text_color = text_color
+
+    # --- 2. Setup Plotting Context ---
+    rc_params = {
+        'figure.facecolor': figure_color,
+        'axes.facecolor': figure_color,
+        'text.color': calc_text_color,
+        'axes.labelcolor': calc_text_color,
+        'xtick.color': calc_text_color,
+        'ytick.color': calc_text_color,
+        'axes.edgecolor': calc_text_color,
+        # 'grid.color': calc_text_color # Optional: if you use grids
+    }
+
+    # Add custom figsize if provided
     if figsize is not None and 'ax' not in kwargs:
         rc_params['figure.figsize'] = figsize
 
