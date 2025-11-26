@@ -7,7 +7,7 @@
 You can install this list of tools as a package directly from GitHub using pip:
 
 ```bash
-pip install git+[https://github.com/knische/knische_tools.git](https://github.com/knische/knische_tools.git)
+pip install git+https://github.com/knische/knische_tools
 ```
 
 ## List of Functions
