@@ -9,9 +9,9 @@ def plot_global_spatial(
     basis="global_spatial", 
     uns_key="global_spatial",
     background_color='lightgrey',
-    background_size=0.0002,
-    size=10,
-    figure_size=(20,20),
+    background_size=0.00015,
+    size=2,
+    figure_size=(30.34,20),           # the aspect ratio of x relative to y is 1.5
     figure_color='#0D0D0D',           # Color of the background / canvas
     text_color='auto',                # 'auto' switches based on figure_color
     **kwargs
@@ -104,7 +104,7 @@ def plot_global_spatial(
     # Add custom figure_size if provided
     if figure_size is not None and 'ax' not in kwargs:
         rc_params['figure.figsize'] = figure_size
-
+        
     # Apply the context just for this plotting command
     with plt.rc_context(rc_params):
         axes_list = sc.pl.embedding(
