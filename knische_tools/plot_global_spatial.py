@@ -120,9 +120,14 @@ def plot_global_spatial(
     # Handle Single vs Multiple Panels (Standardize to list)
     if not isinstance(axes_list, list):
         axes_list = [axes_list]
-
+    
     # Iterate through every axis and paint the background
     for ax in axes_list:
+        # 1. Force 1:1 Aspect Ratio
+        # 'equal' ensures data units are square. 'box' ensures the 
+        # physical plot area is adjusted to fit the data.
+        ax.set_aspect('equal', adjustable='box')
+
         # Verify it's a plot axis (avoids coloring the colorbar axis)
         if hasattr(ax, 'scatter'):
             ax.scatter(
@@ -130,9 +135,10 @@ def plot_global_spatial(
                 bg_vals[:, 1], 
                 c=background_color, 
                 s=background_size,
-                zorder=1, # zorder=1 forces this BEHIND the subset
-                rasterized=True # Optimization for large backgrounds
+                zorder=1,
+                rasterized=True
             )
+            
     # We save here, ensuring the background is captured.
         if save_filename:
             # If the user provided a simple name like "plot.png", we can just save it.
