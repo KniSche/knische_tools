@@ -1,1 +1,2 @@
 from knische_tools.plot_global_spatial import plot_global_spatial
+from knische_tools.plot_global_spatial import plot_global_spatial_rgb
