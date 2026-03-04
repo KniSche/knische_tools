@@ -150,6 +150,6 @@ pip install git+https://github.com/knische/knische_tools
 	</details>
 	
 ## Tutorials & Vignettes
-	* [**Basic usage & advanced spatial plots**](docs/vignettes/plotGlobalSpatial_tutorial.ipynb): A deep dive into multi-channel visualization, gamma correction, and batch normalization.
+* [**Basic usage & advanced spatial plots**](docs/vignettes/plotGlobalSpatial_tutorial.ipynb): A deep dive into multi-channel visualization, gamma correction, and batch normalization.
 	
 	
