@@ -99,7 +99,8 @@ pip install git+https://github.com/knische/knische_tools
 	This function is scatter plot function independent of `sc.pl.embedding` to plot RGB channels for different 
 	gene groups on the global object. In principal it receives similar arguments and plots the `adata.obsm["global_spatial"]`
 	embedding. Later versions will include the actual histology as "background" instead of all points plotted as a raster image.	
-	<details>Usage and Documentation</summary>
+	<details>
+	<summary>Usage and Documentation</summary>
 	
 	### Argument documentation
 	**Parameters:**
