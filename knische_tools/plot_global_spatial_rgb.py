@@ -50,13 +50,11 @@ def plot_global_spatial_rgb(
     else:
         subset_coords = adata.obsm[basis][:, :2]
 
-    # --- 3. ROBUST CHANNEL SCORING ---
+    ## --- 3. ROBUST PER-CHANNEL & PER-GENE SCORING ---
     def get_channel_scores(gene_list, channel_name):
-        # Handle None or Empty inputs
         if gene_list is None or len(gene_list) == 0:
             return np.zeros(adata.n_obs)
             
-        # Filter for genes actually present in the dataset
         found_genes = [g for g in gene_list if g in adata.var_names]
         missing_genes = [g for g in gene_list if g not in adata.var_names]
         
@@ -66,27 +64,50 @@ def plot_global_spatial_rgb(
         if not found_genes:
             return np.zeros(adata.n_obs)
             
-        # Extract and sum expression
+        # Extract raw expression matrix for these genes
         vals = adata[:, found_genes].X
         if hasattr(vals, "toarray"): vals = vals.toarray()
-        raw_sum = np.array(vals.sum(axis=1)).flatten()
         
         def scale_vec(v):
+            """Core scaling logic: Non-zero 98th percentile Min-Max"""
             if len(v) == 0 or np.all(v == 0): return np.zeros_like(v)
-            upper_bound = np.percentile(v, v_max_percentile)
+            v_nonzero = v[v > 0]
+            if len(v_nonzero) == 0: return np.zeros_like(v)
+                
+            upper_bound = np.percentile(v_nonzero, v_max_percentile)
             if upper_bound <= 0: upper_bound = v.max()
+            
             v_clipped = np.clip(v, 0, upper_bound)
             v_min, v_max = v_clipped.min(), v_clipped.max()
-            norm = (v_clipped - v_min) / (v_max - v_min) if v_max > v_min else np.zeros_like(v)
-            return np.power(norm, gamma)
+            
+            # Return linear 0.0 to 1.0 (Gamma is applied later)
+            return (v_clipped - v_min) / (v_max - v_min) if v_max > v_min else np.zeros_like(v)
 
+        def process_matrix(matrix):
+            """Applies within-gene scaling, then channel summation"""
+            # 1. Scale each gene individually to [0, 1]
+            scaled_genes = np.zeros_like(matrix, dtype=float)
+            for i in range(matrix.shape[1]):
+                scaled_genes[:, i] = scale_vec(matrix[:, i])
+                
+            # 2. Sum the standardized genes
+            summed_scores = scaled_genes.sum(axis=1)
+            
+            # 3. Scale the final channel sum back to [0, 1] and apply Gamma
+            final_channel_norm = scale_vec(summed_scores)
+            return np.power(final_channel_norm, gamma)
+
+        # Apply batch correction (if requested)
         if batch_key and batch_key in adata.obs:
-            norm_vec = np.zeros_like(raw_sum, dtype=float)
+            final_vec = np.zeros(adata.n_obs, dtype=float)
             for batch in adata.obs[batch_key].unique():
-                mask = adata.obs[batch_key] == batch
-                norm_vec[mask] = scale_vec(raw_sum[mask])
-            return norm_vec
-        return scale_vec(raw_sum)
+                mask = (adata.obs[batch_key] == batch).values
+                # Slice the matrix for this specific batch and process
+                final_vec[mask] = process_matrix(vals[mask, :])
+            return final_vec
+            
+        # Global processing if no batch key is provided
+        return process_matrix(vals)
 
     # Calculate scores with safety checks
     r_norm = get_channel_scores(r_genes, "Red")
@@ -95,7 +116,9 @@ def plot_global_spatial_rgb(
 
     # --- 4. INTENSITY & ZOOM SCALING ---
     # Driver of size/alpha: The max signal across channels
-    norm_signal = np.max([r_norm, g_norm, b_norm], axis=0)
+    # norm_signal = np.max([r_norm, g_norm, b_norm], axis=0)
+    norm_signal = r_norm + g_norm + b_norm
+    norm_signal[norm_signal > 1] = 1
     
     current_min_s, current_max_s, current_bg_s = min_size, max_size, background_size
     
