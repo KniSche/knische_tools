@@ -18,8 +18,6 @@ pip install git+https://github.com/knische/knische_tools
 	(e.g., a specific tissue section or cell type) while maintaining the context of the full dataset's embedding
 	without requiring the user to manually manage massive coordinate files. Later versions will include the actual 
 	histology as "background" instead of all points plotted as a raster image. 
-	## Tutorials & Vignettes
-	* [**Basic usage & advanced spatial plots**](docs/vignettes/plotGlobalSpatial_tutorial.ipynb): A deep dive into multi-channel visualization, gamma correction, and batch normalization.
 	<details>
 	<summary>Usage and Documentation</summary>
 	
@@ -101,9 +99,9 @@ pip install git+https://github.com/knische/knische_tools
 	This function is scatter plot function independent of `sc.pl.embedding` to plot RGB channels for different 
 	gene groups on the global object. In principal it receives similar arguments and plots the `adata.obsm["global_spatial"]`
 	embedding. Later versions will include the actual histology as "background" instead of all points plotted as a raster image.	
-	<details>
+	<details>Usage and Documentation</summary>
+	
 	### Argument documentation
-
 	**Parameters:**
 	* **`adata`** *(AnnData)*: The subset object containing gene expression. Must contain global coordinates in `adata.uns[uns_key]`.
 	* **`r_genes`, `g_genes`, `b_genes`** *(list, default=None)*: Lists of genes to be mapped to the Red, Green, and Blue channels. Features not found in `adata.var_names` are gracefully skipped with a warning.
@@ -150,4 +148,8 @@ pip install git+https://github.com/knische/knische_tools
 	plt.show()
     	```
 	</details>
-
+	
+## Tutorials & Vignettes
+	* [**Basic usage & advanced spatial plots**](docs/vignettes/plotGlobalSpatial_tutorial.ipynb): A deep dive into multi-channel visualization, gamma correction, and batch normalization.
+	
+	
