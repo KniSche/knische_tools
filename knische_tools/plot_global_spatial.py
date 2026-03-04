@@ -6,90 +6,94 @@ import numpy as np
 def plot_global_spatial(
     adata, 
     color=None, 
-    basis="global_spatial", 
-    uns_key="global_spatial",
-    background_color='lightgrey',
-    background_size=0.00015,
-    size=2,
-    figure_size=(30.34,20),           # the aspect ratio of x relative to y is 1.5
-    figure_color='#0D0D0D',           # Color of the background / canvas
-    text_color='auto',                # 'auto' switches based on figure_color
+    basis="global_spatial",         
+    uns_key="global_spatial",          
+    subset=False,                      # If True, zooms the view to the foreground data
+    auto_size_subset=True,             # Scales spot sizes based on zoom level
+    margin=0.1,                        # Fractional padding around the subset zoom
+    background_color='grey',           # Color of the global reference points
+    background_size=None,              # Auto-calculated if None
+    size=None,                         # Foreground spot size
+    figure_size=(30.34, 20),           # (Width, Height) in inches
+    figure_color='#0D0D0D',            # Canvas background color
+    text_color='auto',                 # Switches between white/black based on figure_color
     **kwargs
 ):
     """
-    Plots the subset data overlaying the global dataset stored in adata.uns.
+    Overlays subset AnnData results onto a global coordinate reference.
     
-    1. Checks if 'basis' exists in adata.obsm. If not, creates it by slicing 
-       adata.uns[uns_key] to match adata.obs_names.
-    2. Plots the global background (from uns) and the subset foreground (from obsm).
-    
-    Parameters:
-    -----------
+    This function handles the alignment of subset data to a master coordinate 
+    dataframe (stored in adata.uns), renders a rasterized background for 
+    performance, and optionally 'zooms' into the subset area while 
+    dynamically scaling spot sizes to maintain visual density.
+
+    Parameters
+    ----------
     adata : AnnData
-        The subset object. Must contain global coords in adata.uns[uns_key].
-    color : str or list
-        Variables in adata.obs or adata.var to plot.
+        The subset object containing the cells to be colored/analyzed.
+    color : str or list, optional
+        Keys in adata.obs or adata.var_names to color by.
     basis : str
-        The key to use for plotting. Defaults to "global_spatial".
-        The function will look for adata.obsm[basis] or adata.obsm['X_' + basis].
+        The obsm key for coordinates. If missing, it will be aligned from the master.
     uns_key : str
-        The key in adata.uns where the full dataframe is stored.
+        The key in adata.uns where the master coordinate DataFrame is stored.
     """
 
-    # Check for save argument
-    # We remove it from kwargs so Scanpy doesn't trigger an early save.
+    # --- 1. INITIAL SETUP & SIZE HEURISTICS ---
     save_filename = kwargs.pop('save', None)
     
-    #  Data Integrity Check & Alignment ---
-    
-    # Check if the global master file exists
-    if uns_key not in adata.uns:
-        raise KeyError(f"'{uns_key}' not found in adata.uns. Please store the full embedding dataframe there first.")
-    
-    # Get the master dataframe
-    full_df = adata.uns[uns_key]
-    
-    # Ensure full_df is a DataFrame (needed for index matching)
-    if not isinstance(full_df, pd.DataFrame):
-        raise TypeError(f"adata.uns['{uns_key}'] must be a Pandas DataFrame with an index matching cell barcodes.")
+    # Calculate a baseline background size if not provided (proportional to figure area)
+    if background_size is None:
+        area = figure_size[0] * figure_size[1]
+        background_size = 0.025 * (area / 100) 
+        
+    if size is None:
+        size = 2.0
 
-    # Check if the specific embedding slot is missing or empty
-    # We check for both 'basis' and 'X_basis' as Scanpy often prepends 'X_'
+    # --- 2. DATA ALIGNMENT ---
+    if uns_key not in adata.uns:
+        raise KeyError(f"Global reference '{uns_key}' not found in adata.uns.")
+    
+    full_df = adata.uns[uns_key]
+    if not isinstance(full_df, pd.DataFrame):
+        raise TypeError(f"Global reference must be a Pandas DataFrame.")
+
+    # Align coordinates: If basis is missing from obsm, map it from the master df
     obsm_keys = adata.obsm.keys()
     if basis not in obsm_keys and f"X_{basis}" not in obsm_keys:
-        print(f"Generating aligned coordinates for adata.obsm['{basis}']...")
-        
-        # Robust alignment: Reindex ensures we get the exact rows for this subset
-        # .reindex fills missing cells with NaN rather than crashing
-        subset_coords = full_df.reindex(adata.obs_names)
-        
-        # Check for missing data
-        if subset_coords.isna().any().any():
-            print("Warning: Some cells in the subset were not found in the global reference (NaNs created).")
-            
-        # Store in obsm (Scanpy expects numpy arrays in obsm)
-        adata.obsm[basis] = subset_coords.values
-
-    # --- STEP 2: Plotting ---
-
-    # Prepare background coordinates (Full Atlas) for Matplotlib
-    # We take the first two columns of the dataframe in uns
+        adata.obsm[basis] = full_df.reindex(adata.obs_names).values[:, :2]
+    
+    # Extract coordinate arrays for scaling calculations
     bg_vals = full_df.values[:, :2]
+    actual_basis = basis if basis in adata.obsm else f"X_{basis}"
+    fg_vals = adata.obsm[actual_basis][:, :2]
 
-    # Plot the Subset (Foreground) using Scanpy
-    # zorder=2 forces these points to sit ON TOP of the background
-    # We only apply figure_size if the user requested it AND they didn't pass an existing axis
-    # If text_color is 'auto', choose white for dark backgrounds, black for light.
+    # --- 3. SMART ZOOM & SCALING LOGIC ---
+    current_bg_s = background_size
+    current_fg_s = size
+
+    if subset and auto_size_subset:
+        # Determine the linear zoom factor based on X-axis range ratio
+        g_x_range = bg_vals[:, 0].max() - bg_vals[:, 0].min()
+        s_x_range = fg_vals[:, 0].max() - fg_vals[:, 0].min()
+        
+        if s_x_range > 0:
+            zoom_factor = np.clip(g_x_range / s_x_range, 1.0, 10.0)
+            
+            # Scale sizes: foreground grows to fill space, background grows less to remain subtle
+            current_fg_s *= (zoom_factor * 0.5)
+            current_bg_s *= (zoom_factor * 2)
+
+    # --- 4. COLOR THEME MANAGEMENT ---
     if text_color == 'auto':
-        # Simple heuristic: if figure_color is dark (starts with #0 or #1 or Black)
-        if figure_color.lower() in ['black', '#000000', '#0d0d0d'] or figure_color.startswith(('#0', '#1', '#2')):
-            calc_text_color = 'white'
-        else:
-            calc_text_color = 'black'
+        # Detect if figure background is dark to set appropriate text contrast
+        dark_shades = ['black', '#000000', '#0d0d0d']
+        is_dark = figure_color.lower() in dark_shades or figure_color.startswith(('#0', '#1', '#2'))
+        calc_text_color = 'white' if is_dark else 'black'
     else:
         calc_text_color = text_color
 
-    # --- 2. Setup Plotting Context ---
+    # Apply aesthetic context
     rc_params = {
         'figure.facecolor': figure_color,
         'axes.facecolor': figure_color,
@@ -98,58 +102,51 @@ def plot_global_spatial(
         'xtick.color': calc_text_color,
         'ytick.color': calc_text_color,
         'axes.edgecolor': calc_text_color,
-        # 'grid.color': calc_text_color # Optional: if you use grids
+        'figure.figsize': figure_size
     }
 
-    # Add custom figure_size if provided
-    if figure_size is not None and 'ax' not in kwargs:
-        rc_params['figure.figsize'] = figure_size
-        
-    # Apply the context just for this plotting command
+    # --- 5. PLOTTING EXECUTION ---
     with plt.rc_context(rc_params):
         axes_list = sc.pl.embedding(
             adata, 
             basis=basis, 
             color=color,
-            size=size,
+            size=current_fg_s, 
             show=False,
             zorder=2, 
             **kwargs
         )
 
-    # Handle Single vs Multiple Panels (Standardize to list)
+    # Ensure axes_list is iterable for multi-panel support
     if not isinstance(axes_list, list):
         axes_list = [axes_list]
     
-    # Iterate through every axis and paint the background
     for ax in axes_list:
-        # 1. Force 1:1 Aspect Ratio
-        # 'equal' ensures data units are square. 'box' ensures the 
-        # physical plot area is adjusted to fit the data.
         ax.set_aspect('equal', adjustable='box')
 
-        # Verify it's a plot axis (avoids coloring the colorbar axis)
         if hasattr(ax, 'scatter'):
+            # Render Background (Rasterized to handle millions of points without lag)
             ax.scatter(
-                bg_vals[:, 0], 
-                bg_vals[:, 1], 
+                bg_vals[:, 0], bg_vals[:, 1], 
                 c=background_color, 
-                s=background_size,
+                s=current_bg_s, 
                 zorder=1,
-                rasterized=True
+                rasterized=True,
+                edgecolors='none'
             )
             
-    # We save here, ensuring the background is captured.
-        if save_filename:
-            # If the user provided a simple name like "plot.png", we can just save it.
-            # We explicitly set facecolor to capture the dark mode background.
-            plt.savefig(
-                save_filename, 
-                facecolor=figure_color, 
-                edgecolor='none',
-                bbox_inches='tight',
-                dpi=300
-            )
-            print(f"Figure saved to: {save_filename}")
+            # Apply coordinate bounding box if subset zoom is requested
+            if subset:
+                x_min, x_max = fg_vals[:, 0].min(), fg_vals[:, 0].max()
+                y_min, y_max = fg_vals[:, 1].min(), fg_vals[:, 1].max()
+                
+                xr, yr = (x_max - x_min), (y_max - y_min)
+                
+                ax.set_xlim(x_min - xr * margin, x_max + xr * margin)
+                ax.set_ylim(y_min - yr * margin, y_max + yr * margin)
+
+    # Final Save Handling
+    if save_filename:
+        plt.savefig(save_filename, facecolor=figure_color, bbox_inches='tight', dpi=300)
             
     return axes_list
